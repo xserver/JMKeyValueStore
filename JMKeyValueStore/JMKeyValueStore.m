@@ -116,7 +116,7 @@ static NSString *const kDelete_Items_With_Prefix_SQL = @"DELETE from %@ where id
 
 - (void)clearTableWithName:(NSString *)tableName {
     
-    if ([self tableExists:tableName]) {
+    if ([self tableExistsAtName:tableName]) {
         return;
     }
     NSString * sql = [NSString stringWithFormat:kClear_All_SQL, tableName];
@@ -129,21 +129,20 @@ static NSString *const kDelete_Items_With_Prefix_SQL = @"DELETE from %@ where id
     }
 }
 
-- (BOOL)tableExists:(NSString *)tableName {
+- (BOOL)tableExistsAtName:(NSString *)tableName {
     if ([JMKeyValueStore checkTableName:tableName] == NO) {
         return NO;
     }
     
-    __block BOOL result;
+    __block BOOL exists;
     [_dbQueue inDatabase:^(FMDatabase *db) {
-        result = [db tableExists:tableName];
+        exists = [db tableExists:tableName];
     }];
     
-    if (!result) {
+    if (exists == NO) {
         debugLog(@"ERROR, table: %@ not exists in current DB", tableName);
     }
-    
-    return result;
+    return exists;
 }
 
 - (StoreValueType)typeWithValue:(id)value {
@@ -166,8 +165,8 @@ static NSString *const kDelete_Items_With_Prefix_SQL = @"DELETE from %@ where id
 
 #pragma mark - custom table
 - (void)putValue:(id)value forKey:(NSString *)key intoTable:(NSString *)tableName {
-    
-    if ([self tableExists:tableName]) {
+
+    if ( ! [self tableExistsAtName:tableName]) {
         return;
     }
     
@@ -215,7 +214,7 @@ static NSString *const kDelete_Items_With_Prefix_SQL = @"DELETE from %@ where id
 
 - (JMKeyValueItem *)itemForKey:(NSString *)key fromTable:(NSString *)tableName {
     
-    if ([self tableExists:tableName]) {
+    if ( ! [self tableExistsAtName:tableName]) {
         return nil;
     }
     
@@ -268,7 +267,7 @@ static NSString *const kDelete_Items_With_Prefix_SQL = @"DELETE from %@ where id
 
 - (NSArray *)allItemsFromTable:(NSString *)tableName {
     
-    if ([self tableExists:tableName]) {
+    if ( ! [self tableExistsAtName:tableName]) {
         return nil;
     }
     NSString * sql = [NSString stringWithFormat:kSelect_All_SQL, tableName];
@@ -301,7 +300,7 @@ static NSString *const kDelete_Items_With_Prefix_SQL = @"DELETE from %@ where id
 
 - (void)removeValueForKey:(NSString *)key fromTable:(NSString *)tableName {
     
-    if ([self tableExists:tableName]) {
+    if ( ! [self tableExistsAtName:tableName]) {
         return;
     }
     NSString * sql = [NSString stringWithFormat:kDelete_Item_SQL, tableName];
@@ -316,7 +315,7 @@ static NSString *const kDelete_Items_With_Prefix_SQL = @"DELETE from %@ where id
 
 - (void)removeValuesForKeys:(NSArray *)keys fromTable:(NSString *)tableName {
     
-    if ([self tableExists:tableName]) {
+    if ( ! [self tableExistsAtName:tableName]) {
         return;
     }
     NSMutableString *stringBuilder = [NSMutableString string];
@@ -341,7 +340,7 @@ static NSString *const kDelete_Items_With_Prefix_SQL = @"DELETE from %@ where id
 
 - (void)removeValuesByKeyPrefix:(NSString *)keyPrefix fromTable:(NSString *)tableName {
     
-    if ([self tableExists:tableName]) {
+    if ( ! [self tableExistsAtName:tableName]) {
         return;
     }
     NSString *sql = [NSString stringWithFormat:kDelete_Items_With_Prefix_SQL, tableName];
