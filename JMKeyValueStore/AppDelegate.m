@@ -20,7 +20,7 @@
 
     NSString *path = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
     path = [path stringByAppendingPathComponent:@"test.db"];
-    JMKeyValueStore *store = [[JMKeyValueStore alloc] initWithDBWithPath:path];
+    JMKeyValueStore *store = [[JMKeyValueStore alloc] initWithDatabasePath:path];
     
     NSString *tableName = @"user_table";
     [store createTableWithName:tableName];
@@ -32,10 +32,13 @@
     
     
     [store putValue:user forKey:key intoTable:tableName];
-    
     NSDictionary *queryUser = [store valueForKey:key fromTable:tableName];
-    NSLog(@"query data result: %@", queryUser);
-
+    NSLog(@"custom table result: %@", queryUser);
+    
+    [store putValue:user forKey:key];
+    queryUser = [store valueForKey:key];
+    NSLog(@"default table result: %@", queryUser);
+    
     return YES;
 }
 

@@ -55,9 +55,6 @@ typedef NS_ENUM(NSUInteger, StoreValueType) {
 
 @implementation JMKeyValueStore
 
-static NSString *const kDefault_DB_Name = @"database.sqlite";
-static NSString *const kDefault_Table_Name = @"store_table";
-
 static NSString *const kCreate_Table_SQL =
 @"CREATE TABLE IF NOT EXISTS %@ ( \
 id TEXT NOT NULL, \
@@ -86,7 +83,7 @@ static NSString *const kDelete_Items_With_Prefix_SQL = @"DELETE from %@ where id
     return YES;
 }
 
-- (id)initWithDBWithPath:(NSString *)dbPath {
+- (id)initWithDatabasePath:(NSString *)dbPath {
 
     if (self = [super init]) {
         debugLog(@"dbPath = %@", dbPath);
@@ -94,7 +91,6 @@ static NSString *const kDelete_Items_With_Prefix_SQL = @"DELETE from %@ where id
             [self close];
         }
         _dbQueue = [FMDatabaseQueue databaseQueueWithPath:dbPath];
-        [self createTableWithName:kDefault_Table_Name];
     }
     return self;
 }
@@ -156,11 +152,24 @@ static NSString *const kDelete_Items_With_Prefix_SQL = @"DELETE from %@ where id
 }
 
 #pragma mark - default table
+- (void)setDefaultTableName:(NSString *)defaultTableName {
+    _defaultTableName = defaultTableName;
+    [self createTableWithName:defaultTableName];
+}
+
 - (void)putValue:(id)value forKey:(NSString *)key {
-    [self putValue:value forKey:key intoTable:kDefault_Table_Name];
+    if (_defaultTableName == nil) {
+        return;
+    }
+    
+    [self putValue:value forKey:key intoTable:_defaultTableName];
 }
 - (id)valueForKey:(NSString *)key {
-    return [self valueForKey:key fromTable:kDefault_Table_Name];
+    if (_defaultTableName == nil) {
+        return nil;
+    }
+    
+    return [self valueForKey:key fromTable:_defaultTableName];
 }
 
 #pragma mark - custom table

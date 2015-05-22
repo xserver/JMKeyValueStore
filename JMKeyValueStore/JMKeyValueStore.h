@@ -9,26 +9,26 @@
 #import <Foundation/Foundation.h>
 
 //  Help you store anything string data to sqlite.
+//  value = [NSArray, NSDictionary, NSString, NSNumber]
 @interface JMKeyValueStore : NSObject
 
+@property (nonatomic, copy) NSString *defaultTableName; //  default = nil
 
 //  init & close
-- (id)initWithDBWithPath:(NSString *)dbPath;
+- (id)initWithDatabasePath:(NSString *)dbPath;
 - (void)createTableWithName:(NSString *)tableName;
 - (void)clearTableWithName:(NSString *)tableName;
 - (void)close;
-
-
-//  use default table
-//  value = [JSON, NSArray, NSDictionary, NSData, NSString, NSNumber]
-- (void)putValue:(id)value forKey:(NSString *)key;
-- (id)valueForKey:(NSString *)key;
 
 
 //  use custom table
 - (void)putValue:(id)value forKey:(NSString *)key intoTable:(NSString *)tableName;
 - (id)valueForKey:(NSString *)key fromTable:(NSString *)tableName;
 
+
+//  use default table
+- (void)putValue:(id)value forKey:(NSString *)key;
+- (id)valueForKey:(NSString *)key;
 
 //  clear
 - (void)removeValueForKey:(NSString *)key fromTable:(NSString *)tableName;
